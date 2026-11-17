@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Direct Dynamic Retargeting for Humanoid Imitation Learning from Videos</title>
+  <meta name="description" content="Direct Dynamic Retargeting (DDR) tracks human keypoints directly in task space inside a physics simulator, to turn monocular videos into dynamically feasible humanoid references, deployed zero-shot on a Unitree H1-2 and R1.">
+  <meta name="keywords" content="humanoid, motion retargeting, imitation learning, monocular video, model predictive control, reinforcement learning">
+  <!-- Remove the next line when the page is made public -->
+  <meta name="robots" content="noindex">
+  <meta property="og:title" content="Direct Dynamic Retargeting for Humanoid Imitation Learning from Videos">
+  <meta property="og:image" content="static/images/fig_overview.png">
+  <meta property="og:type" content="website">
+
+  <link rel="icon" href="static/images/laasicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Google+Sans:wght@500;700&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.4/css/academicons.min.css">
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script defer src="static/js/links.js"></script>
+  <script defer src="static/js/index.js"></script>
+</head>
+<body>
+
+<nav class="topnav" aria-label="Sections">
+  <a href="../index.html" class="back" title="All projects">&larr; Projects</a>
+  <a href="#top" class="brand">DDR</a>
+  <div class="topnav-links">
+    <a href="#video">Video</a>
+    <a href="#abstract">Abstract</a>
+    <a href="#idea">Method</a>
+    <a href="#results">Results</a>
+    <a href="#hardware">Hardware</a>
+    <a href="#dataset">Dataset</a>
+    <a href="#bibtex">BibTeX</a>
+  </div>
+</nav>
+
+<!-- ============================ HERO ============================ -->
+<header class="hero" id="top">
+  <div class="hero-body">
+    <div class="container is-max-desktop has-text-centered">
+      <h1 class="title is-1 publication-title">Direct Dynamic Retargeting for Humanoid Imitation Learning from Videos</h1>
+
+      <div class="is-size-5 publication-authors">
+        <span class="author-block"><a href="https://constantroux.github.io/">Constant Roux</a><sup>1,*</sup>,</span>
+        <span class="author-block"><a href="https://ludovicdematteis.github.io/">Ludovic De Matteïs</a><sup>1,*</sup>,</span>
+        <span class="author-block"><a href="https://www.linkedin.com/in/mathias-gatineau/">Mathias Gatineau</a><sup>1</sup>,</span>
+        <span class="author-block">Armand Jordana<sup>1</sup>,</span>
+        <span class="author-block">Valentin Guillet<sup>2</sup>,</span>
+        <span class="author-block">Nicolas Mansard<sup>1,3</sup>,</span>
+        <span class="author-block"><a href="https://homepages.laas.fr/ostasse/hugo/">Olivier Stasse</a><sup>1,3</sup>,</span>
+        <span class="author-block">Philippe Souères<sup>1</sup></span>
+      </div>
+      <div class="is-size-6 publication-affiliations">
+        <span><sup>1</sup> LAAS-CNRS, Université de Toulouse, France</span>
+        <span><sup>2</sup> IRT Saint-Exupéry, Toulouse, France</span>
+        <span><sup>3</sup> Artificial and Natural Intelligence Toulouse Institute (ANITI), France</span>
+        <span><sup>*</sup> Equal contribution</span>
+      </div>
+
+      <!-- The links are set in static/js/links.js: a button without link stays greyed out -->
+      <div class="publication-links">
+        <a class="button is-rounded is-dark" data-link="paper"><span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper</span></a>
+        <a class="button is-rounded is-dark" data-link="arxiv"><span class="icon"><i class="ai ai-arxiv"></i></span><span>arXiv</span></a>
+        <a class="button is-rounded is-dark" data-link="video"><span class="icon"><i class="fas fa-play"></i></span><span>Video</span></a>
+        <a class="button is-rounded is-dark" data-link="code"><span class="icon"><i class="fab fa-github"></i></span><span>Code</span></a>
+        <a class="button is-rounded is-hf" data-link="dataset"><span class="icon emoji">🤗</span><span>Dataset</span></a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============================ VIDEO ============================ -->
+<section class="section teaser" id="video">
+  <div class="container is-max-desktop">
+    <div class="video-frame">
+      <video id="overview" controls playsinline preload="metadata" poster="static/videos/overview.jpg">
+        <source src="static/videos/overview.mp4" type="video/mp4">
+      </video>
+    </div>
+    <p class="subtitle is-6 has-text-centered mt-4">
+      DDR turns monocular videos into dynamically feasible humanoid trajectories by tracking the human keypoints
+      in task space, inside a physics simulator. The resulting imitation policies run zero-shot on a Unitree H1-2 and R1, two robots of very different sizes.
+    </p>
+  </div>
+</section>
+
+<!-- ============================ ABSTRACT ============================ -->
+<section class="section pt-0" id="abstract">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 has-text-centered">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Imitation Learning from monocular video demonstrations provides a scalable approach for teaching complex skills to humanoid robots.
+            However, translating human motion to humanoids requires overcoming significant morphological mismatches.
+            So far, dynamic retargeting methods obtain physically feasible references by tracking an intermediate geometric retargeting in simulation, usually through its joint angles.
+            We show that this intermediate step biases the solution through two factors: the space in which the reference is tracked, joint angles rather than task-space keypoints, and the tracked reference itself, the keypoints of the geometric retargeting rather than those of the human demonstration.
+          </p>
+          <p>
+            We propose <strong>Direct Dynamic Retargeting (DDR)</strong>, which bypasses both: it tracks the human keypoints exclusively in task space with a sampling-based Model Predictive Control solver inside a physics simulator, without contact annotations.
+            DDR is evaluated in simulation against joint-space dynamic retargeting under controlled conditions (identical solver, budget, and warm start), on three humanoids and on motions from monocular videos and motion capture.
+            The tracking space explains most of the gain in end-effector accuracy and robustness, and tracking the human demonstration directly prevents the transmission of errors from the intermediate geometric reference.
+            This advantage carries over to Reinforcement Learning imitation policies, which reproduce the human demonstration more faithfully than policies trained on joint-space dynamic references.
+            These policies are deployed zero-shot on two physical humanoids of very different sizes, H1-2 and R1, including contact-rich motions.
+            We release the source code and a dataset of dynamically feasible references covering all the flat-ground motions of AMASS on the three humanoids.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ IDEA ============================ -->
+<section class="section band" id="idea">
+  <div class="container is-max-desktop">
+    <div class="has-text-centered section-head">
+      <h2 class="title is-3">Method</h2>
+      <p class="subtitle is-5">Track the human, not the intermediate retargeting</p>
+    </div>
+
+    <figure class="figure-card">
+      <img src="static/images/fig_overview.png" alt="Pipeline: monocular video, human keypoints, DDR, imitation policy, zero-shot deployment" loading="lazy">
+      <figcaption>From a monocular video (or motion capture) to a policy on the real robot, without contact annotation and with the same cost weights for all motions.</figcaption>
+    </figure>
+
+    <div class="columns is-vcentered mt-5">
+      <div class="column is-three-fifths">
+        <figure class="figure-card">
+          <img src="static/images/fig_approaches.png" alt="Geometric, indirect and direct dynamic retargeting" loading="lazy">
+          <figcaption>GR: geometric optimization in task space. IDR: GR followed by a dynamic optimization that tracks it in joint space. DDR: a single dynamic optimization in task space, with respect to the human reference.</figcaption>
+        </figure>
+      </div>
+      <div class="column">
+        <h3 class="factor-head">The geometric bias has two factors</h3>
+        <div class="factor">
+          <span class="factor-tag">i</span>
+          <div>
+            <h3 class="title is-6">Tracking space</h3>
+            <p>Matching the joint angles of the geometric reference anchors the solution to a posture that is generally not dynamically feasible, and degrades the end-effectors, which carry contact and balance.</p>
+          </div>
+        </div>
+        <div class="factor">
+          <span class="factor-tag">ii</span>
+          <div>
+            <h3 class="title is-6">Tracked reference</h3>
+            <p>The errors of the geometric retargeting become the target of the dynamic stage, instead of the human demonstration itself.</p>
+          </div>
+        </div>
+        <p class="content is-size-6 mt-4">
+          <strong>DDR</strong> avoids both: a CEM-based MPC tracks the human keypoints in task space inside MuJoCo, and uses the geometric solution only as a warm start.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ RESULTS ============================ -->
+<section class="section" id="results">
+  <div class="container is-max-desktop">
+    <div class="has-text-centered section-head">
+      <h2 class="title is-3">Findings</h2>
+      <p class="subtitle is-5">A controlled comparison: same simulator, solver, budget and warm start for all dynamic methods</p>
+    </div>
+
+    <div class="legend">
+      <span class="chip" style="--c:#e0a821"><b>GR</b> geometric</span>
+      <span class="chip" style="--c:#8e4ec6"><b>IDR-J</b> tracks GR joint angles</span>
+      <span class="chip" style="--c:#17becf"><b>IDR-JT</b> joint + task-space</span>
+      <span class="chip" style="--c:#2a78d6"><b>DDR-G</b> tracks GR keypoints</span>
+      <span class="chip" style="--c:#2f9e5f"><b>DDR</b> tracks human keypoints</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num">16–48&nbsp;%</div><div class="stat-lab">lower end-effector error than joint-space dynamic retargeting (IDR-J)</div></div>
+      <div class="stat"><div class="stat-num">31 → 56&nbsp;%</div><div class="stat-lab">of ACCAD runs keep the pelvis within 10&nbsp;cm of the reference (IDR-J → DDR)</div></div>
+      <div class="stat"><div class="stat-num">41–57&nbsp;%</div><div class="stat-lab">lower end-effector error for the DDR policies than for the IDR-J policies, on H1-2</div></div>
+      <div class="stat"><div class="stat-num">8 vs 18&nbsp;%</div><div class="stat-lab">of frames with a wrong foot contact, DDR against the geometric baseline, with no contact annotation</div></div>
+    </div>
+
+    <div class="carousel" data-carousel aria-label="Figures">
+      <div class="carousel-track">
+        <figure class="slide figure-slide">
+          <h4 class="slide-title">Where the error comes from</h4>
+          <img src="static/images/fig_keypoints.png" alt="Per-keypoint error relative to DDR" loading="lazy">
+          <figcaption>Per-keypoint Laplacian error of IDR-J and IDR-JT relative to DDR (%). Red: higher error than DDR; blue: lower. Joint-space tracking mainly degrades the extremities: at the ankles and feet, the error of IDR-J is 41–103&nbsp;% higher than that of DDR on the three robots.</figcaption>
+        </figure>
+        <figure class="slide figure-slide">
+          <h4 class="slide-title">The closer to the geometric joints, the less accurate</h4>
+          <img src="static/images/fig_cross.png" alt="End-effector error versus joint deviation from GR" loading="lazy">
+          <figcaption>End-effector error versus joint deviation from the GR reference, per clip.</figcaption>
+        </figure>
+        <figure class="slide figure-slide">
+          <h4 class="slide-title">Same reference, only the joint weight changes</h4>
+          <img src="static/images/fig_sweep.png" alt="Success rate and end-effector error versus joint weight" loading="lazy">
+          <figcaption>Success rate and end-effector error versus the joint-tracking weight <i>w<sub>q</sub></i> of IDR-JT on H1-2 (ACCAD). <i>w<sub>q</sub></i>&nbsp;=&nbsp;0 is DDR-G. From <i>w<sub>q</sub></i>&nbsp;=&nbsp;0 to 100, the share of runs deviating by more than 50&nbsp;cm rises from 1.7 to 91.5&nbsp;% and the median end-effector error from 75 to 102&nbsp;mm.</figcaption>
+        </figure>
+        <figure class="slide figure-slide">
+          <h4 class="slide-title">Faster motions, larger gap</h4>
+          <img src="static/images/fig_dynamism.png" alt="Laplacian error versus motion dynamism" loading="lazy">
+          <figcaption>Laplacian error versus motion dynamism (median per quantile bin). In the most dynamic ACCAD class, the median error of IDR-J exceeds that of DDR by 15–46&nbsp;% in Laplacian error and by 78–98&nbsp;% in end-effector error.</figcaption>
+        </figure>
+        <figure class="slide figure-slide">
+          <h4 class="slide-title">Errors of the reference propagate</h4>
+          <img src="static/images/fig_delta.png" alt="Propagation of the error of a degraded geometric reference" loading="lazy">
+          <figcaption>Laplacian error of DDR-GS over DDR-G versus error of the degraded reference GR-S over GR, per clip. A method that tracks the degraded reference inherits a large share of its errors (slope of the linear fit: 0.61–0.87 per panel); DDR does not.</figcaption>
+        </figure>
+      </div>
+      <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
+      <button class="carousel-btn next" aria-label="Next">&#8250;</button>
+      <div class="carousel-dots"></div>
+    </div>
+
+    <ul class="takeaways">
+      <li><b>The tracking space is the dominant factor.</b> Tracking the same geometric reference in task space (DDR-G) already obtains most of the gain of DDR over joint-space tracking, increasingly so for dynamic motions.</li>
+      <li><b>The tracked reference matters when it is degraded.</b> When the geometric reference is accurate, DDR and DDR-G perform similarly; when it is degraded, a method tracking it inherits more than half of its error.</li>
+      <li><b>The advantage carries over to RL policies,</b> which reproduce the bias of the reference they imitate.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ COMPARISONS ============================ -->
+<section class="section band" id="comparisons">
+  <div class="container is-max-desktop">
+    <div class="has-text-centered section-head">
+      <h2 class="title is-3">Retargeting in simulation</h2>
+      <p class="subtitle is-5">H1-2, same solver, budget and warm start. White spheres: human keypoints</p>
+    </div>
+    <div class="carousel" data-carousel aria-label="Retargeting comparisons">
+      <div class="carousel-track">
+        <figure class="slide video-slide">
+          <h4 class="slide-title">Kung-fu reconstructed from a monocular video</h4>
+          <video muted loop playsinline preload="none" poster="static/videos/cmp_kungfu.jpg"><source src="static/videos/cmp_kungfu.mp4" type="video/mp4"></video>
+        </figure>
+        <figure class="slide video-slide">
+          <h4 class="slide-title">Highly dynamic motion: the gap widens</h4>
+          <video muted loop playsinline preload="none" poster="static/videos/cmp_dynamic.jpg"><source src="static/videos/cmp_dynamic.mp4" type="video/mp4"></video>
+        </figure>
+        <figure class="slide video-slide">
+          <h4 class="slide-title">Typical failure of joint-space tracking</h4>
+          <video muted loop playsinline preload="none" poster="static/videos/cmp_failure.jpg"><source src="static/videos/cmp_failure.mp4" type="video/mp4"></video>
+        </figure>
+        <figure class="slide video-slide">
+          <h4 class="slide-title">Degraded geometric reference</h4>
+          <video muted loop playsinline preload="none" poster="static/videos/cmp_degraded.jpg"><source src="static/videos/cmp_degraded.mp4" type="video/mp4"></video>
+        </figure>
+      </div>
+      <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
+      <button class="carousel-btn next" aria-label="Next">&#8250;</button>
+      <div class="carousel-dots"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ HARDWARE ============================ -->
+<section class="section" id="hardware">
+  <div class="container is-max-desktop">
+    <div class="has-text-centered section-head">
+      <h2 class="title is-3">Zero-shot deployment</h2>
+      <p class="subtitle is-5">Imitation policies trained on DDR references, same cost weights for all motions and robots</p>
+      <p class="content is-size-6 mt-3">The same pipeline transfers zero-shot from the small R1 to the full-size H1-2. The motions of the H1-2 are less clean than those of the R1: larger robots are harder to control.</p>
+    </div>
+
+    <h3 class="grid-title">Unitree R1 <span>proprioception only: the squat, and a crawl and a side kick (ACCAD) whose contact sequences are specified nowhere in the pipeline</span></h3>
+    <div class="video-grid cols-2">
+        <figure class="vtile"><video data-autoplay muted loop playsinline preload="none" poster="static/videos/hw_r1_squat.jpg"><source src="static/videos/hw_r1_squat.mp4" type="video/mp4"></video>
+          <figcaption><span class="tag-robot r1">R1</span> Squat</figcaption></figure>
+        <figure class="vtile"><video data-autoplay muted loop playsinline preload="none" poster="static/videos/hw_r1_crawl_1.jpg"><source src="static/videos/hw_r1_crawl_1.mp4" type="video/mp4"></video>
+          <figcaption><span class="tag-robot r1">R1</span> Crawl, view 1</figcaption></figure>
+        <figure class="vtile"><video data-autoplay muted loop playsinline preload="none" poster="static/videos/hw_r1_crawl_2.jpg"><source src="static/videos/hw_r1_crawl_2.mp4" type="video/mp4"></video>
+          <figcaption><span class="tag-robot r1">R1</span> Crawl, view 2</figcaption></figure>
+        <figure class="vtile"><video data-autoplay muted loop playsinline preload="none" poster="static/videos/hw_r1_kick.jpg"><source src="static/videos/hw_r1_kick.mp4" type="video/mp4"></video>
+          <figcaption><span class="tag-robot r1">R1</span> Side kick</figcaption></figure>
+    </div>
+
+    <h3 class="grid-title">Unitree H1-2 <span>six motions reconstructed from monocular videos</span></h3>
+    <div class="video-grid cols-3">
+        <figure class="vtile"><video data-autoplay muted loop playsinline preload="none" poster="static/videos/hw_squat.jpg"><source src="static/videos/hw_squat.mp4" type="video/mp4"></video>
+          <figcaption><span class="tag-robot">H1-2</span> Squat</figcaption></figure>
+        <figure class="vtile"><video data-autoplay muted loop playsinline preload="none" poster="static/videos/hw_kung_fu.jpg"><source src="static/videos/hw_kung_fu.mp4" type="video/mp4"></video>
+          <figcaption><span class="tag-robot">H1-2</span> Kung-fu</figcaption></figure>
+        <figure class="vtile"><video data-autoplay muted loop playsinline preload="none" poster="static/videos/hw_one_foot_balance.jpg"><source src="static/videos/hw_one_foot_balance.mp4" type="video/mp4"></video>
+          <figcaption><span class="tag-robot">H1-2</span> One-foot balance</figcaption></figure>
+        <figure class="vtile"><video data-autoplay muted loop playsinline preload="none" poster="static/videos/hw_pistol_squat.jpg"><source src="static/videos/hw_pistol_squat.mp4" type="video/mp4"></video>
+          <figcaption><span class="tag-robot">H1-2</span> Pistol squat</figcaption></figure>
+        <figure class="vtile"><video data-autoplay muted loop playsinline preload="none" poster="static/videos/hw_balancing_stick.jpg"><source src="static/videos/hw_balancing_stick.mp4" type="video/mp4"></video>
+          <figcaption><span class="tag-robot">H1-2</span> Balancing stick</figcaption></figure>
+        <figure class="vtile"><video data-autoplay muted loop playsinline preload="none" poster="static/videos/hw_walk.jpg"><source src="static/videos/hw_walk.mp4" type="video/mp4"></video>
+          <figcaption><span class="tag-robot">H1-2</span> Walk</figcaption></figure>
+    </div>
+
+    <figure class="vtile wide">
+      <video data-autoplay muted loop playsinline preload="none" poster="static/videos/sim2real.jpg"><source src="static/videos/sim2real.mp4" type="video/mp4"></video>
+      <figcaption><span class="tag-robot">H1-2</span> Sim-to-real on the walk: foot contacts of the annotated ground truth, the simulation and the real robot</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================ DATASET ============================ -->
+<section class="section band" id="dataset">
+  <div class="container is-max-desktop">
+    <div class="columns is-vcentered">
+      <div class="column is-two-fifths">
+        <h2 class="title is-3">Dataset and code</h2>
+        <div class="content">
+          <p>Dynamically feasible references for <strong>all the flat-ground motions of AMASS</strong>, retargeted with DDR on <strong>H1-2, G1 and R1</strong>.</p>
+        </div>
+        <div class="publication-links left">
+          <a class="button is-rounded is-hf" data-link="dataset"><span class="icon emoji">🤗</span><span>Hugging Face</span></a>
+          <a class="button is-rounded is-dark" data-link="code"><span class="icon"><i class="fab fa-github"></i></span><span>GitHub</span></a>
+        </div>
+      </div>
+      <div class="column">
+        <div class="video-frame">
+          <video data-autoplay muted loop playsinline preload="none" poster="static/videos/dataset.jpg"><source src="static/videos/dataset.mp4" type="video/mp4"></video>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ BIBTEX ============================ -->
+<section class="section" id="bibtex">
+  <div class="container is-max-desktop">
+    <div class="bib-head">
+      <h2 class="title is-4 mb-0">BibTeX</h2>
+      <button class="button is-small is-rounded" id="copy-bib"><span class="icon"><i class="far fa-copy"></i></span><span>Copy</span></button>
+    </div>
+    <pre id="bibtex-code"><code>@misc{roux2026directdynamicretargetinghumanoid,
+      title={Direct Dynamic Retargeting for Humanoid Imitation Learning from Videos}, 
+      author={Constant Roux and Ludovic De Matteïs and Mathias Gatineau and Armand Jordana and Valentin Guillet and Nicolas Mansard and Olivier Stasse and Philippe Souères},
+      year={2026},
+      eprint={2605.23762},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2605.23762}, 
+}</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container is-max-desktop">
+    <div class="content has-text-centered is-size-7">
+      <p>This project was provided with computing HPC and storage resources by GENCI at IDRIS thanks to the grant 2026-AD011016104R1 on the supercomputer Jean Zay's V100 and H100 partitions.</p>
+      <p>
+        This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+        Template from <a href="https://nerfies.github.io/">Nerfies</a> and <a href="https://constraints-as-terminations.github.io/">Constraints-as-Terminations</a>.
+      </p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
